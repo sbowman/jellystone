@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: jellystone
+      POSTGRES_PASSWORD: jellystone
+    ports:
+      - "15432:5432"
+    volumes:
+      - jellystone_db:/var/lib/postgresql/data
+
+  exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    depends_on:
+      - "postgres"
+    environment:
+      DATA_SOURCE_NAME: postgresql://postgres:jellystone@postgres:5432/jellystone?sslmode=disable
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - metrics:/prometheus
+      - ./prometheus:/etc/prometheus
+
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  jellystone_db:
+    driver: local
+  metrics:
+    driver: local
+  grafana-data:
+    driver: local
