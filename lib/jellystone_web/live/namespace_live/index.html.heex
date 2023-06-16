@@ -1,0 +1,41 @@
+<.header>
+  Listing Namespaces
+  <:actions>
+    <.link patch={~p"/namespaces/new"}>
+      <.button>New Namespace</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="namespaces"
+  rows={@streams.namespaces}
+  row_click={fn {_id, namespace} -> JS.navigate(~p"/namespaces/#{namespace}") end}
+>
+  <:col :let={{_id, namespace}} label="Name"><%= namespace.name %></:col>
+  <:action :let={{_id, namespace}}>
+    <div class="sr-only">
+      <.link navigate={~p"/namespaces/#{namespace}"}>Show</.link>
+    </div>
+    <.link patch={~p"/namespaces/#{namespace}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, namespace}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: namespace.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="namespace-modal" show on_cancel={JS.patch(~p"/namespaces")}>
+  <.live_component
+    module={JellystoneWeb.NamespaceLive.FormComponent}
+    id={@namespace.id || :new}
+    title={@page_title}
+    action={@live_action}
+    namespace={@namespace}
+    patch={~p"/namespaces"}
+  />
+</.modal>

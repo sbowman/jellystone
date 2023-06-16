@@ -2,11 +2,16 @@ defmodule Jellystone.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Jellystone.Accounts
+
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+
+    has_many :team_members, Accounts.TeamMember
+    many_to_many :teams, Accounts.Team, join_through: Accounts.TeamMember
 
     timestamps()
   end
@@ -53,6 +58,7 @@ defmodule Jellystone.Accounts.User do
     changeset
     |> validate_required([:password])
     |> validate_length(:password, min: 6, max: 72)
+    |> validate_confirmation(:password, message: "does not match the password")
     # Examples of additional password validation:
     # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
     # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")

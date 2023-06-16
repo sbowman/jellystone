@@ -33,6 +33,7 @@ defmodule JellystoneWeb.UserRegistrationLive do
 
         <.input field={@form[:email]} type="email" label="Email" required />
         <.input field={@form[:password]} type="password" label="Password" required />
+        <.input field={@form[:password_confirmation]} type="password" label="Confirm" required />
 
         <:actions>
           <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
@@ -49,6 +50,7 @@ defmodule JellystoneWeb.UserRegistrationLive do
       socket
       |> assign(trigger_submit: false, check_errors: false)
       |> assign_form(changeset)
+      |> assign(:page_title, "Register")
 
     {:ok, socket, temporary_assigns: [form: nil]}
   end

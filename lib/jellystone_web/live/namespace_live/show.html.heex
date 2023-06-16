@@ -1,0 +1,26 @@
+<.header>
+  Namespace <%= @namespace.id %>
+  <:subtitle>This is a namespace record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/namespaces/#{@namespace}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit namespace</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @namespace.name %></:item>
+</.list>
+
+<.back navigate={~p"/namespaces"}>Back to namespaces</.back>
+
+<.modal :if={@live_action == :edit} id="namespace-modal" show on_cancel={JS.patch(~p"/namespaces/#{@namespace}")}>
+  <.live_component
+    module={JellystoneWeb.NamespaceLive.FormComponent}
+    id={@namespace.id}
+    title={@page_title}
+    action={@live_action}
+    namespace={@namespace}
+    patch={~p"/namespaces/#{@namespace}"}
+  />
+</.modal>

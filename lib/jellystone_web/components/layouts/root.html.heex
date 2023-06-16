@@ -4,23 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title suffix=" · Phoenix Framework">
-      <%= assigns[:page_title] || "Jellystone" %>
-    </.live_title>
+    <%= if assigns[:page_title] do %>
+      <.live_title suffix=" - Jellystone">
+        <%= assigns[:page_title] %>
+      </.live_title>
+    <% else %>
+      <title>Jellystone</title>
+    <% end %>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
   </head>
   <body class="bg-white antialiased">
-    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 lg:py-4 justify-end bg-park-blue">
       <%= if @current_user do %>
-        <li class="text-[0.8125rem] leading-6 text-zinc-900">
+        <li class="text-[0.8125rem] leading-6 text-park-white">
           <%= @current_user.email %>
         </li>
         <li>
           <.link
             href={~p"/users/settings"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-park-white font-semibold hover:text-park-tan"
           >
             Settings
           </.link>
@@ -29,7 +33,7 @@
           <.link
             href={~p"/users/log_out"}
             method="delete"
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-park-white font-semibold hover:text-park-tan"
           >
             Log out
           </.link>
@@ -38,7 +42,7 @@
         <li>
           <.link
             href={~p"/users/register"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-park-white font-semibold hover:text-park-tan"
           >
             Register
           </.link>
@@ -46,7 +50,7 @@
         <li>
           <.link
             href={~p"/users/log_in"}
-            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+            class="text-[0.8125rem] leading-6 text-park-white font-semibold hover:text-park-tan"
           >
             Log in
           </.link>

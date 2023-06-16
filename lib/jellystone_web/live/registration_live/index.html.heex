@@ -1,0 +1,42 @@
+<.header>
+  Listing Registrations
+  <:actions>
+    <.link patch={~p"/registrations/new"}>
+      <.button>New Registration</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="registrations"
+  rows={@streams.registrations}
+  row_click={fn {_id, registration} -> JS.navigate(~p"/registrations/#{registration}") end}
+>
+  <:col :let={{_id, registration}} label="Name"><%= registration.name %></:col>
+  <:col :let={{_id, registration}} label="Description"><%= registration.description %></:col>
+  <:action :let={{_id, registration}}>
+    <div class="sr-only">
+      <.link navigate={~p"/registrations/#{registration}"}>Show</.link>
+    </div>
+    <.link patch={~p"/registrations/#{registration}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, registration}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: registration.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="registration-modal" show on_cancel={JS.patch(~p"/registrations")}>
+  <.live_component
+    module={JellystoneWeb.RegistrationLive.FormComponent}
+    id={@registration.id || :new}
+    title={@page_title}
+    action={@live_action}
+    registration={@registration}
+    patch={~p"/registrations"}
+  />
+</.modal>

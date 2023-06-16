@@ -24,9 +24,9 @@ defmodule JellystoneWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", JellystoneWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", JellystoneWeb do
+    pipe_through :api
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:jellystone, :dev_routes) do
@@ -40,7 +40,7 @@ defmodule JellystoneWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: JellystoneWeb.Telemetry
+      live_dashboard "/dashboard", metrics: JellystoneWeb.Telemetry, ecto_repos: [Jellystone.Repo]
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
@@ -68,6 +68,56 @@ defmodule JellystoneWeb.Router do
       on_mount: [{JellystoneWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+
+      # Manage teams
+      live "/teams", TeamLive.Index, :index
+      live "/teams/new", TeamLive.Index, :new
+      live "/teams/:id/edit", TeamLive.Index, :edit
+
+      live "/teams/:id", TeamLive.Show, :show
+      live "/teams/:id/show/edit", TeamLive.Show, :edit
+
+      # Kubernetes sites
+      live "/sites", SiteLive.Index, :index
+      live "/sites/new", SiteLive.Index, :new
+      live "/sites/:id/edit", SiteLive.Index, :edit
+
+      live "/sites/:id", SiteLive.Show, :show
+      live "/sites/:id/show/edit", SiteLive.Show, :edit
+      live "/sites/:id/namespace/new", SiteLive.Show, :new_namespace
+      live "/sites/:id/namespace/:nsid/edit", SiteLive.Show, :edit_namespace
+
+      # Kubernetes namespaces
+      live "/namespaces", NamespaceLive.Index, :index
+      #       live "/namespaces/new", NamespaceLive.Index, :new
+      #       live "/namespaces/:id/edit", NamespaceLive.Index, :edit
+      # 
+      live "/namespaces/:id", NamespaceLive.Show, :show
+      #       live "/namespaces/:id/show/edit", NamespaceLive.Show, :edit
+
+      # Kubernetes deployments, e.g. "fourier-core" or "delphi-core"
+      live "/deployments", DeploymentLive.Index, :index
+      live "/deployments/new", DeploymentLive.Index, :new
+      live "/deployments/:id/edit", DeploymentLive.Index, :edit
+
+      live "/deployments/:id", DeploymentLive.Show, :show
+      live "/deployments/:id/show/edit", DeploymentLive.Show, :edit
+
+      # Database registration (helps track the databases we've created)
+      live "/registrations", RegistrationLive.Index, :index
+      live "/registrations/new", RegistrationLive.Index, :new
+      live "/registrations/:id/edit", RegistrationLive.Index, :edit
+
+      live "/registrations/:id", RegistrationLive.Show, :show
+      live "/registrations/:id/show/edit", RegistrationLive.Show, :edit
+
+      # Support tagging databases
+      live "/tags", TagLive.Index, :index
+      live "/tags/new", TagLive.Index, :new
+      live "/tags/:id/edit", TagLive.Index, :edit
+
+      live "/tags/:id", TagLive.Show, :show
+      live "/tags/:id/show/edit", TagLive.Show, :edit
     end
   end
 

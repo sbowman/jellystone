@@ -1,0 +1,41 @@
+<.header>
+  Listing Deployments
+  <:actions>
+    <.link patch={~p"/deployments/new"}>
+      <.button>New Deployment</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="deployments"
+  rows={@streams.deployments}
+  row_click={fn {_id, deployment} -> JS.navigate(~p"/deployments/#{deployment}") end}
+>
+  <:col :let={{_id, deployment}} label="Name"><%= deployment.name %></:col>
+  <:action :let={{_id, deployment}}>
+    <div class="sr-only">
+      <.link navigate={~p"/deployments/#{deployment}"}>Show</.link>
+    </div>
+    <.link patch={~p"/deployments/#{deployment}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, deployment}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: deployment.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="deployment-modal" show on_cancel={JS.patch(~p"/deployments")}>
+  <.live_component
+    module={JellystoneWeb.DeploymentLive.FormComponent}
+    id={@deployment.id || :new}
+    title={@page_title}
+    action={@live_action}
+    deployment={@deployment}
+    patch={~p"/deployments"}
+  />
+</.modal>

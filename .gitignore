@@ -38,4 +38,4 @@ npm-debug.log
 # Mac
 .DS_Store
 ._*
-
+*.afphoto

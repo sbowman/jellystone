@@ -1,0 +1,27 @@
+<.header>
+  Registration <%= @registration.id %>
+  <:subtitle>This is a registration record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/registrations/#{@registration}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit registration</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name"><%= @registration.name %></:item>
+  <:item title="Description"><%= @registration.description %></:item>
+</.list>
+
+<.back navigate={~p"/registrations"}>Back to registrations</.back>
+
+<.modal :if={@live_action == :edit} id="registration-modal" show on_cancel={JS.patch(~p"/registrations/#{@registration}")}>
+  <.live_component
+    module={JellystoneWeb.RegistrationLive.FormComponent}
+    id={@registration.id}
+    title={@page_title}
+    action={@live_action}
+    registration={@registration}
+    patch={~p"/registrations/#{@registration}"}
+  />
+</.modal>

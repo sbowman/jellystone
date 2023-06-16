@@ -350,4 +350,41 @@ defmodule Jellystone.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  alias Jellystone.Accounts.Team
+  alias Jellystone.Accounts.TeamMember
+
+  def list_teams do
+    Repo.all(Team)
+  end
+
+  def get_team!(id), do: Repo.get!(Team, id)
+
+  def create_team(attrs \\ %{}) do
+    %Team{}
+    |> Team.create_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def change_team(%Team{} = team, attrs \\ %{}) do
+    team
+    |> Team.rename_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_team(%Team{} = team) do
+    Repo.delete(team)
+  end
+
+  def add_team_member(%Team{} = team, %User{} = user) do
+    team
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:members, [user])
+    |> Repo.update()
+  end
+
+  def remove_team_member(%Team{} = team, %User{} = user) do
+    from(tm in TeamMember, where: tm.user == ^user and tm.team == ^team)
+    |> Repo.delete_all()
+  end
 end
