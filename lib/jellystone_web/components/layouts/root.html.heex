@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,6 +17,14 @@
   </head>
   <body class="bg-white antialiased">
     <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 lg:py-4 justify-end bg-park-blue">
+      <li>
+        <div class="bg-brand/5  font-park text-park-sky text-2xl rounded-full px-2 font-medium leading-6 flex flex-row items-center">
+          <a href="/">Jellystone</a>
+        </div>
+      </li>
+
+      <li class="grow"></li>
+
       <%= if @current_user do %>
         <li class="text-[0.8125rem] leading-6 text-park-white">
           <%= @current_user.email %>

@@ -3,3 +3,12 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+@font-face {
+  font-family: 'Park';
+  src:
+    url('/fonts/park-webfont.woff2') format('woff2'),
+    url('/fonts/park-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}

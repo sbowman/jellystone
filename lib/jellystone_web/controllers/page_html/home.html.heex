@@ -53,7 +53,9 @@
 
     <%= if @current_user do %>
       <div class="my-16">
-        <.link href={~p"/sites"}>Sites</.link>
+        <.link href={~p"/sites"}>
+          <.button>Sites</.button>
+        </.link>
       </div>
     <% end %>
   </div>

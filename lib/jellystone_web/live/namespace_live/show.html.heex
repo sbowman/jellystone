@@ -12,9 +12,14 @@
   <:item title="Name"><%= @namespace.name %></:item>
 </.list>
 
-<.back navigate={~p"/namespaces"}>Back to namespaces</.back>
+<.back navigate={~p"/sites/#{@namespace.site_id}"}>Back to site</.back>
 
-<.modal :if={@live_action == :edit} id="namespace-modal" show on_cancel={JS.patch(~p"/namespaces/#{@namespace}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="namespace-modal"
+  show
+  on_cancel={JS.patch(~p"/namespaces/#{@namespace}")}
+>
   <.live_component
     module={JellystoneWeb.NamespaceLive.FormComponent}
     id={@namespace.id}

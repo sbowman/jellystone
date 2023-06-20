@@ -101,4 +101,10 @@ And in "teams," I added:
 
 
 
+        <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
+      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
+        v<%= Application.spec(:jellystone, :vsn) %>
+      </p>
+    </div>
+
 

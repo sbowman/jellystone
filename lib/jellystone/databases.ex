@@ -19,7 +19,32 @@ defmodule Jellystone.Databases do
 
   """
   def list_sites do
-    Repo.all(Site)
+    total_namespaces_by_site =
+      from n in Namespace,
+        group_by: n.site_id,
+        select: %{
+          site_id: n.site_id,
+          total_namespaces: count(n.id)
+        }
+
+    Repo.all(
+      from s in Site,
+        left_join: total in subquery(total_namespaces_by_site),
+        on: total.site_id == s.id,
+        order_by: :name,
+        select: %Site{
+          id: s.id,
+          name: s.name,
+          description: s.description,
+          total_namespaces: total.total_namespaces
+        }
+    )
+
+    # Repo.all(
+    #   from s in Site,
+    #     order_by: :name,
+    #     preload: [:namespaces]
+    # )
   end
 
   @doc """
@@ -37,9 +62,13 @@ defmodule Jellystone.Databases do
 
   """
   def get_site!(id) do
+    namespaces = from(namespace in Namespace, order_by: :name)
+
     Site
     |> Repo.get!(id)
-    |> Repo.preload(:namespaces)
+    |> Repo.preload(namespaces: namespaces)
+
+    # |> Repo.preload(:namespaces)
   end
 
   @doc """

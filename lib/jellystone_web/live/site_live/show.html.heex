@@ -1,5 +1,5 @@
 <.header>
-    <%= @site.name %>
+  <%= @site.name %>
   <:actions>
     <.link patch={~p"/sites/#{@site}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit site</.button>
@@ -11,30 +11,32 @@
 </.header>
 
 <p>
-    <%= @site.description %>
+  <%= @site.description %>
 </p>
 
-<.table
-  id="namespaces"
-  rows={@site.namespaces}
-  row_click={fn namespace -> JS.navigate(~p"/namespaces/#{namespace}") end}
->
-  <:col :let={namespace} label="Namespace"><%= namespace.name %></:col>
-  <:action :let={namespace}>
-    <div class="sr-only">
-      <.link navigate={~p"/namespaces/#{namespace}"}>Show</.link>
-    </div>
-    <.link patch={~p"/sites/#{@site}/namespace/#{namespace}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={namespace}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: namespace.id}) |> hide("##{namespace.id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+<%= if @site.namespaces do %>
+  <.table
+    id="namespaces"
+    rows={@site.namespaces}
+    row_click={fn namespace -> JS.navigate(~p"/namespaces/#{namespace}") end}
+  >
+    <:col :let={namespace} label="Namespace"><%= namespace.name %></:col>
+    <:action :let={namespace}>
+      <div class="sr-only">
+        <.link navigate={~p"/namespaces/#{namespace}"}>Show</.link>
+      </div>
+      <.link patch={~p"/sites/#{@site}/namespace/#{namespace}/edit"}>Edit</.link>
+    </:action>
+    <:action :let={namespace}>
+      <.link
+        phx-click={JS.push("delete", value: %{id: namespace.id}) |> hide("##{namespace.id}")}
+        data-confirm="Are you sure?"
+      >
+        Delete
+      </.link>
+    </:action>
+  </.table>
+<% end %>
 
 <.back navigate={~p"/sites"}>Back to sites</.back>
 
@@ -49,13 +51,19 @@
   />
 </.modal>
 
-<.modal :if={@live_action in [:new_namespace, :edit_namespace]} id="namespace-modal" show on_cancel={JS.patch(~p"/sites/#{@site}")}>
+<.modal
+  :if={@live_action in [:new_namespace, :edit_namespace]}
+  id="namespace-modal"
+  show
+  on_cancel={JS.patch(~p"/sites/#{@site}")}
+>
   <.live_component
     module={JellystoneWeb.NamespaceLive.FormComponent}
     id={@namespace.id || :new}
     title={@page_title}
     action={@live_action}
     namespace={@namespace}
+    site={@site}
     patch={~p"/sites/#{@site}"}
   />
 </.modal>

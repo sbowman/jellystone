@@ -12,11 +12,14 @@ module.exports = {
         "../lib/*_web/**/*.*ex"
     ],
     theme: {
+        fontFamily: {
+            'park': ['Park']
+        },
         extend: {
             colors: {
                 brand: "#FD4F00",
                 "park-blue": "#0A2E44",
-                "park-sky": "84BCCB",
+                "park-sky": "#84BCCB",
                 "park-tan": "#CFBA5D",
                 "park-white": "#FAFAFA"
             }

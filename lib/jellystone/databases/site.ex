@@ -7,6 +7,7 @@ defmodule Jellystone.Databases.Site do
   schema "sites" do
     field :name, :string
     field :description, :string
+    field :total_namespaces, :integer, virtual: true
 
     has_many :namespaces, Namespace
   end

@@ -28,7 +28,7 @@ defmodule JellystoneWeb.SiteLive.Index do
 
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "Listing Sites")
+    |> assign(:page_title, "RDEI Sites")
     |> assign(:site, nil)
   end
 

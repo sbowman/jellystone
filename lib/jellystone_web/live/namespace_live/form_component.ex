@@ -2,9 +2,13 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
   use JellystoneWeb, :live_component
 
   alias Jellystone.Databases
+  alias Jellystone.Databases.Site
 
   @impl true
   def render(assigns) do
+    sites = Jellystone.Repo.all(Site)
+    sites = Enum.map(sites, &{&1.name, &1.id})
+
     ~H"""
     <div>
       <.header>
@@ -20,6 +24,8 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
+        <.input field={@form[:site_id]} type="select" label="Site" options={sites} />
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Namespace</.button>
         </:actions>
@@ -49,7 +55,16 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
   end
 
   def handle_event("save", %{"namespace" => namespace_params}, socket) do
-    save_namespace(socket, socket.assigns.action, namespace_params)
+    case socket.assigns.action do
+      :new_namespace ->
+        save_namespace(socket, :new, namespace_params)
+
+      :edit_namespace ->
+        save_namespace(socket, :edit, namespace_params)
+
+      _ ->
+        save_namespace(socket, socket.assigns.action, namespace_params)
+    end
   end
 
   defp save_namespace(socket, :edit, namespace_params) do
@@ -59,7 +74,7 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Namespace updated successfully")
+         |> put_flash(:info, "Namespace \"#{namespace.name}\" updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -74,10 +89,12 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Namespace created successfully")
+         |> put_flash(:info, "Namespace \"#{namespace.name}\" created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        IO.inspect(changeset)
+
         {:noreply, assign_form(socket, changeset)}
     end
   end
