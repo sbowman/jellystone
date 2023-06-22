@@ -1,15 +1,37 @@
 defmodule JellystoneWeb.DeploymentLive.FormComponent do
   use JellystoneWeb, :live_component
 
+  import Ecto.Query, only: [from: 2], warn: false
+
   alias Jellystone.Databases
+  alias Jellystone.Databases.Namespace
+  alias Jellystone.Databases.Site
 
   @impl true
   def render(assigns) do
+    namespaces =
+      Jellystone.Repo.all(
+        from n in Namespace,
+          join: s in Site,
+          on: n.site_id == s.id,
+          order_by: [s.name, n.name],
+          select: %Namespace{n | site: s}
+      )
+
+    groups = Map.from_keys(Enum.map(namespaces, fn n -> n.site.name end), [])
+
+    namespaces =
+      Enum.reduce(namespaces, groups, fn n, acc ->
+        %{acc | n.site.name => acc[n.site.name] ++ [{n.name, n.id}]}
+      end)
+
+    # namespaces = Enum.map(namespaces, &{"#{&1.name} (#{&1.site.name})", &1.id})
+
     ~H"""
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage deployment records in your database.</:subtitle>
+        <:subtitle>What's the name of this deployment?</:subtitle>
       </.header>
 
       <.simple_form
@@ -20,6 +42,8 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
+        <.input field={@form[:namespace_id]} type="select" label="Namespace" options={namespaces} />
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Deployment</.button>
         </:actions>
@@ -49,7 +73,16 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
   end
 
   def handle_event("save", %{"deployment" => deployment_params}, socket) do
-    save_deployment(socket, socket.assigns.action, deployment_params)
+    case socket.assigns.action do
+      :new_deployment ->
+        save_deployment(socket, :new, deployment_params)
+
+      :edit_deployment ->
+        save_deployment(socket, :edit, deployment_params)
+
+      _ ->
+        save_deployment(socket, socket.assigns.action, deployment_params)
+    end
   end
 
   defp save_deployment(socket, :edit, deployment_params) do
@@ -59,7 +92,7 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Deployment updated successfully")
+         |> put_flash(:info, "Deployment \"#{deployment.name}\" updated successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -74,7 +107,7 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Deployment created successfully")
+         |> put_flash(:info, "Deployment \"#{deployment.name}\" created successfully")
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -83,6 +116,8 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
+    IO.inspect(changeset)
+
     assign(socket, :form, to_form(changeset))
   end
 

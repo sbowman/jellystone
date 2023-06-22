@@ -11,7 +11,7 @@ defmodule Jellystone.Repo.Migrations.CreateRegistrations do
       timestamps()
     end
 
-    create unique_index(:registrations, [:name])
+    create unique_index(:registrations, [:name, :deployment_id])
     create index(:registrations, [:team])
     create index(:registrations, [:deployment_id])
   end

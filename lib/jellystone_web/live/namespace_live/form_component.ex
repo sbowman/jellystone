@@ -1,12 +1,20 @@
 defmodule JellystoneWeb.NamespaceLive.FormComponent do
   use JellystoneWeb, :live_component
 
+  import Ecto.Query, only: [from: 2], warn: false
+
   alias Jellystone.Databases
   alias Jellystone.Databases.Site
 
   @impl true
   def render(assigns) do
-    sites = Jellystone.Repo.all(Site)
+    sites =
+      Jellystone.Repo.all(
+        from s in Site,
+          order_by: s.name,
+          select: s
+      )
+
     sites = Enum.map(sites, &{&1.name, &1.id})
 
     ~H"""
@@ -93,8 +101,6 @@ defmodule JellystoneWeb.NamespaceLive.FormComponent do
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        IO.inspect(changeset)
-
         {:noreply, assign_form(socket, changeset)}
     end
   end

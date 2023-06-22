@@ -403,13 +403,15 @@ defmodule JellystoneWeb.CoreComponents do
   attr :class, :string, default: nil
 
   slot :inner_block, required: true
+  slot :icon
   slot :subtitle
   slot :actions
 
   def header(assigns) do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", @class]}>
-      <div>
+      <div :if={@icon != []}><%= render_slot(@icon) %></div>
+      <div class="flex flex-col grow">
         <h1 class="text-lg font-semibold leading-8 text-zinc-800">
           <%= render_slot(@inner_block) %>
         </h1>

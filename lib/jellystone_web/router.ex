@@ -91,17 +91,19 @@ defmodule JellystoneWeb.Router do
       live "/namespaces", NamespaceLive.Index, :index
       #       live "/namespaces/new", NamespaceLive.Index, :new
       #       live "/namespaces/:id/edit", NamespaceLive.Index, :edit
-      # 
+      #
       live "/namespaces/:id", NamespaceLive.Show, :show
+      live "/namespaces/:id/deployments/new", NamespaceLive.Show, :new_deployment
+      live "/namespaces/:id/deployments/:deployment_id/edit", NamespaceLive.Show, :edit_deployment
       #       live "/namespaces/:id/show/edit", NamespaceLive.Show, :edit
 
       # Kubernetes deployments, e.g. "fourier-core" or "delphi-core"
       live "/deployments", DeploymentLive.Index, :index
-      live "/deployments/new", DeploymentLive.Index, :new
-      live "/deployments/:id/edit", DeploymentLive.Index, :edit
+      # live "/deployments/new", DeploymentLive.Index, :new
+      # live "/deployments/:id/edit", DeploymentLive.Index, :edit
 
       live "/deployments/:id", DeploymentLive.Show, :show
-      live "/deployments/:id/show/edit", DeploymentLive.Show, :edit
+      # live "/deployments/:id/show/edit", DeploymentLive.Show, :edit
 
       # Database registration (helps track the databases we've created)
       live "/registrations", RegistrationLive.Index, :index

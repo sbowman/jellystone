@@ -7,7 +7,7 @@ defmodule Jellystone.Repo.Migrations.CreateNamespaces do
       add :site_id, references(:sites, on_delete: :delete_all), null: false
     end
 
-    create unique_index(:namespaces, [:name])
+    create unique_index(:namespaces, [:name, :site_id])
     create index(:namespaces, [:site_id])
   end
 end

@@ -7,7 +7,7 @@ defmodule Jellystone.Repo.Migrations.CreateDeployments do
       add :namespace_id, references(:namespaces, on_delete: :delete_all), null: false
     end
 
-    create unique_index(:deployments, [:name])
+    create unique_index(:deployments, [:name, :namespace_id])
     create index(:deployments, [:namespace_id])
   end
 end

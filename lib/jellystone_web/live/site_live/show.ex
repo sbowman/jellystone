@@ -11,9 +11,12 @@ defmodule JellystoneWeb.SiteLive.Show do
 
   @impl true
   def handle_params(%{"id" => id} = params, _url, socket) do
+    site = Databases.get_site!(id)
+
     socket =
       socket
-      |> assign(:site, Databases.get_site!(id))
+      |> assign(:site, site)
+      |> stream(:namespaces, Databases.list_namespaces(site))
 
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
@@ -34,7 +37,7 @@ defmodule JellystoneWeb.SiteLive.Show do
     |> assign(:namespace, %Namespace{site_id: id})
   end
 
-  def apply_action(socket, :edit_namespace, %{"id" => id}) do
+  def apply_action(socket, :edit_namespace, %{"nsid" => id}) do
     socket
     |> assign(:page_title, "Edit Namespace")
     |> assign(:namespace, Databases.get_namespace!(id))
@@ -44,8 +47,15 @@ defmodule JellystoneWeb.SiteLive.Show do
   def handle_event("delete", %{"id" => id}, socket) do
     namespace = Databases.get_namespace!(id)
     {:ok, _} = Databases.delete_namespace(namespace)
-
-    # TODO: need namespaces to be a stream!
     {:noreply, stream_delete(socket, :namespaces, namespace)}
+  end
+
+  @impl true
+  def handle_info({JellystoneWeb.NamespaceLive.FormComponent, {:saved, namespace}}, socket) do
+    if socket.assigns.site.id == namespace.site_id do
+      {:noreply, stream_insert(socket, :namespaces, namespace)}
+    else
+      {:noreply, socket}
+    end
   end
 end

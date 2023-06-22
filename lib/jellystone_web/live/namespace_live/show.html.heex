@@ -1,18 +1,47 @@
 <.header>
-  Namespace <%= @namespace.id %>
-  <:subtitle>This is a namespace record from your database.</:subtitle>
+  <%= @namespace.name %>
+  <:icon>
+    <img src={~p"/images/ns.png"} width="64" class="mr-2" />
+  </:icon>
+  <:subtitle>
+    <.link patch={~p"/sites/#{@site.id}"} class="text-sky-600 underline underline-offset-4">
+      <%= @site.name %>
+    </.link>
+    &gt; <%= @namespace.name %>
+  </:subtitle>
   <:actions>
     <.link patch={~p"/namespaces/#{@namespace}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit namespace</.button>
     </.link>
+    <.link patch={~p"/namespaces/#{@namespace}/deployments/new"} phx-click={JS.push_focus()}>
+      <.button>Add deployment</.button>
+    </.link>
   </:actions>
 </.header>
 
-<.list>
-  <:item title="Name"><%= @namespace.name %></:item>
-</.list>
+<.table
+  id="deployments"
+  rows={@streams.deployments}
+  row_click={fn {_id, deployment} -> JS.navigate(~p"/deployments/#{deployment}") end}
+>
+  <:col :let={{_id, deployment}} label="Name"><%= deployment.name %></:col>
+  <:action :let={{_id, deployment}}>
+    <div class="sr-only">
+      <.link navigate={~p"/deployments/#{deployment}"}>Show</.link>
+    </div>
+    <.link patch={~p"/namespaces/#{@namespace}/deployments/#{deployment}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, deployment}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: deployment.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
 
-<.back navigate={~p"/sites/#{@namespace.site_id}"}>Back to site</.back>
+<.back navigate={~p"/sites/#{@site.id}"}>Back to site <em><%= @site.name %></em></.back>
 
 <.modal
   :if={@live_action == :edit}
@@ -26,6 +55,22 @@
     title={@page_title}
     action={@live_action}
     namespace={@namespace}
+    patch={~p"/namespaces/#{@namespace}"}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action in [:new_deployment, :edit_deployment]}
+  id="deployment-modal"
+  show
+  on_cancel={JS.patch(~p"/namespaces/#{@namespace}")}
+>
+  <.live_component
+    module={JellystoneWeb.DeploymentLive.FormComponent}
+    id={@deployment.id || :new}
+    title={@page_title}
+    action={@live_action}
+    deployment={@deployment}
     patch={~p"/namespaces/#{@namespace}"}
   />
 </.modal>

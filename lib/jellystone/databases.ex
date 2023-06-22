@@ -8,6 +8,7 @@ defmodule Jellystone.Databases do
 
   alias Jellystone.Databases.Site
   alias Jellystone.Databases.Namespace
+  alias Jellystone.Databases.Deployment
 
   @doc """
   Returns the list of sites.
@@ -32,12 +33,7 @@ defmodule Jellystone.Databases do
         left_join: total in subquery(total_namespaces_by_site),
         on: total.site_id == s.id,
         order_by: :name,
-        select: %Site{
-          id: s.id,
-          name: s.name,
-          description: s.description,
-          total_namespaces: total.total_namespaces
-        }
+        select: %Site{s | total_namespaces: total.total_namespaces}
     )
 
     # Repo.all(
@@ -62,11 +58,14 @@ defmodule Jellystone.Databases do
 
   """
   def get_site!(id) do
-    namespaces = from(namespace in Namespace, order_by: :name)
-
     Site
     |> Repo.get!(id)
-    |> Repo.preload(namespaces: namespaces)
+
+    # namespaces = from(namespace in Namespace, order_by: :name)
+
+    # Site
+    # |> Repo.get!(id)
+    # |> Repo.preload(namespaces: namespaces)
 
     # |> Repo.preload(:namespaces)
   end
@@ -149,6 +148,14 @@ defmodule Jellystone.Databases do
   """
   def list_namespaces do
     Repo.all(Namespace)
+  end
+
+  def list_namespaces(%Site{id: site_id}) do
+    Repo.all(
+      from n in Namespace,
+        where: n.site_id == ^site_id,
+        select: n
+    )
   end
 
   @doc """
@@ -245,6 +252,14 @@ defmodule Jellystone.Databases do
   """
   def list_deployments do
     Repo.all(Deployment)
+  end
+
+  def list_deployments(%Namespace{id: namespace_id}) do
+    Repo.all(
+      from d in Deployment,
+        where: d.namespace_id == ^namespace_id,
+        select: d
+    )
   end
 
   @doc """

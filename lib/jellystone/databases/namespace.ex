@@ -14,8 +14,7 @@ defmodule Jellystone.Databases.Namespace do
   def changeset(namespace, attrs) do
     namespace
     |> cast(attrs, [:name, :site_id])
-    |> validate_required([:name])
-    |> validate_required([:site_id])
-    |> unique_constraint(:name)
+    |> validate_required([:name, :site_id])
+    |> unique_constraint([:name, :site_id])
   end
 end
