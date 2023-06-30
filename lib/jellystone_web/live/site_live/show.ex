@@ -21,6 +21,18 @@ defmodule JellystoneWeb.SiteLive.Show do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
+  @impl true
+  def handle_params(%{"site_name" => site_name} = params, _url, socket) do
+    site = Databases.site_by_name!(site_name)
+
+    socket =
+      socket
+      |> assign(:site, site)
+      |> stream(:namespaces, Databases.list_namespaces(site))
+
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
   def apply_action(socket, :show, _params) do
     socket
     |> assign(:page_title, "Site #{socket.assigns.site.name}")
@@ -41,6 +53,15 @@ defmodule JellystoneWeb.SiteLive.Show do
     socket
     |> assign(:page_title, "Edit Namespace")
     |> assign(:namespace, Databases.get_namespace!(id))
+  end
+
+  @impl true
+  def handle_event("new_namespace", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, "Add Namespace")
+     |> assign(:live_action, :new_namespace)
+     |> assign(:namespace, %Namespace{site_id: socket.assigns.site.id})}
   end
 
   @impl true

@@ -6,6 +6,8 @@ defmodule Jellystone.Databases.Deployment do
 
   schema "deployments" do
     field :name, :string
+    field :total_databases, :integer, virtual: true
+
     belongs_to :namespace, Namespace
   end
 

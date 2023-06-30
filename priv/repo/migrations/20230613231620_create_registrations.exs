@@ -3,16 +3,16 @@ defmodule Jellystone.Repo.Migrations.CreateRegistrations do
 
   def change do
     create table(:registrations) do
-      add :name, :string, null: false
-      add :description, :string
-      add :team, references(:teams, on_delete: :nothing), null: false
-      add :deployment_id, references(:deployments, on_delete: :nilify_all)
+      add(:name, :string, null: false)
+      add(:description, :string)
+      add(:team, references(:teams, on_delete: :nothing))
+      add(:deployment_id, references(:deployments, on_delete: :nilify_all))
 
       timestamps()
     end
 
-    create unique_index(:registrations, [:name, :deployment_id])
-    create index(:registrations, [:team])
-    create index(:registrations, [:deployment_id])
+    create(unique_index(:registrations, [:name, :deployment_id]))
+    create(index(:registrations, [:team]))
+    create(index(:registrations, [:deployment_id]))
   end
 end

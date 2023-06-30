@@ -1,15 +1,44 @@
 defmodule JellystoneWeb.RegistrationLive.FormComponent do
   use JellystoneWeb, :live_component
 
+  import Ecto.Query, only: [from: 2], warn: false
+
   alias Jellystone.Databases
+  alias Jellystone.Databases.Deployment
+  alias Jellystone.Databases.Namespace
+  alias Jellystone.Databases.Site
 
   @impl true
   def render(assigns) do
+    deployments =
+      Jellystone.Repo.all(
+        from(d in Deployment,
+          join: n in Namespace,
+          on: d.namespace_id == n.id,
+          join: s in Site,
+          on: n.site_id == s.id,
+          order_by: [s.name, n.name, d.name],
+          select: %Deployment{d | namespace: %Namespace{n | site: s}}
+        )
+      )
+
+    groups =
+      Map.from_keys(
+        Enum.map(deployments, fn d -> "#{d.namespace.site.name} > #{d.namespace.name}" end),
+        []
+      )
+
+    deployments =
+      Enum.reduce(deployments, groups, fn d, acc ->
+        name = "#{d.namespace.site.name} > #{d.namespace.name}"
+        %{acc | name => acc[name] ++ [{d.name, d.id}]}
+      end)
+
     ~H"""
     <div>
       <.header>
         <%= @title %>
-        <:subtitle>Use this form to manage registration records in your database.</:subtitle>
+        <:subtitle>What would you like to call this database?</:subtitle>
       </.header>
 
       <.simple_form
@@ -20,7 +49,9 @@ defmodule JellystoneWeb.RegistrationLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:description]} type="text" label="Description" />
+        <.input field={@form[:description]} type="textarea" label="Description" />
+        <.input field={@form[:deployment_id]} type="select" label="Deployment" options={deployments} />
+
         <:actions>
           <.button phx-disable-with="Saving...">Save Registration</.button>
         </:actions>
@@ -50,7 +81,16 @@ defmodule JellystoneWeb.RegistrationLive.FormComponent do
   end
 
   def handle_event("save", %{"registration" => registration_params}, socket) do
-    save_registration(socket, socket.assigns.action, registration_params)
+    case socket.assigns.action do
+      :new_registration ->
+        save_registration(socket, :new, registration_params)
+
+      :edit_registration ->
+        save_registration(socket, :edit, registration_params)
+
+      _ ->
+        save_registration(socket, socket.assigns.action, registration_params)
+    end
   end
 
   defp save_registration(socket, :edit, registration_params) do
@@ -69,6 +109,9 @@ defmodule JellystoneWeb.RegistrationLive.FormComponent do
   end
 
   defp save_registration(socket, :new, registration_params) do
+    IO.puts("Saving!!!!")
+    IO.inspect(registration_params)
+
     case Databases.create_registration(registration_params) do
       {:ok, registration} ->
         notify_parent({:saved, registration})

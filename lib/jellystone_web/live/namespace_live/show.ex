@@ -14,6 +14,22 @@ defmodule JellystoneWeb.NamespaceLive.Show do
     namespace = Databases.get_namespace!(id)
     site = Databases.get_site!(namespace.site_id)
 
+    reply_params(socket, site, namespace, params)
+  end
+
+  @impl true
+  def handle_params(
+        %{"site_name" => site_name, "namespace_name" => namespace_name} = params,
+        _url,
+        socket
+      ) do
+    site = Databases.site_by_name!(site_name)
+    namespace = Databases.ns_by_name!(namespace_name, site)
+
+    reply_params(socket, site, namespace, params)
+  end
+
+  defp reply_params(socket, site, namespace, params) do
     socket =
       socket
       |> assign(:page_title, "Namespace #{socket.assigns.live_action}")
@@ -24,23 +40,23 @@ defmodule JellystoneWeb.NamespaceLive.Show do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  def apply_action(socket, :show, _params) do
+  defp apply_action(socket, :show, _params) do
     socket
     |> assign(:page_title, "Namespace #{socket.assigns.namespace.name}")
   end
 
-  def apply_action(socket, :edit, _params) do
+  defp apply_action(socket, :edit, _params) do
     socket
     |> assign(:page_title, "Edit Namespace")
   end
 
-  def apply_action(socket, :new_deployment, %{"id" => id}) do
+  defp apply_action(socket, :new_deployment, %{"id" => id}) do
     socket
     |> assign(:page_title, "Add Deployment")
     |> assign(:deployment, %Deployment{namespace_id: id})
   end
 
-  def apply_action(socket, :edit_deployment, %{"deployment_id" => id}) do
+  defp apply_action(socket, :edit_deployment, %{"deployment_id" => id}) do
     socket
     |> assign(:page_title, "Edit Deployment")
     |> assign(:deployment, Databases.get_deployment!(id))
@@ -51,6 +67,15 @@ defmodule JellystoneWeb.NamespaceLive.Show do
     deployment = Databases.get_deployment!(id)
     {:ok, _} = Databases.delete_deployment(deployment)
     {:noreply, stream_delete(socket, :deployments, deployment)}
+  end
+
+  @impl true
+  def handle_event("new_deployment", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, "Add Deployment")
+     |> assign(:live_action, :new_deployment)
+     |> assign(:deployment, %Deployment{namespace_id: socket.assigns.namespace.id})}
   end
 
   @impl true

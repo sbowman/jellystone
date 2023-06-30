@@ -6,6 +6,7 @@ defmodule Jellystone.Databases.Namespace do
 
   schema "namespaces" do
     field :name, :string
+    field :total_deployments, :integer, virtual: true
 
     belongs_to :site, Site
   end

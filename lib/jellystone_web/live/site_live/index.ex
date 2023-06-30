@@ -38,6 +38,15 @@ defmodule JellystoneWeb.SiteLive.Index do
   end
 
   @impl true
+  def handle_event("new_site", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:page_title, "New Site")
+     |> assign(:live_action, :new)
+     |> assign(:site, %Site{})}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     site = Databases.get_site!(id)
     {:ok, _} = Databases.delete_site(site)

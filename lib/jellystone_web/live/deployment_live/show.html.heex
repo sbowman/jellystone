@@ -1,26 +1,87 @@
 <.header>
-  Deployment <%= @deployment.id %>
-  <:subtitle>This is a deployment record from your database.</:subtitle>
+  <%= @deployment.name %>
+  <:icon>
+    <img src={~p"/images/deployment.png"} width="64" class="mr-2" />
+  </:icon>
+  <:subtitle>
+    <.link patch={~p"/sites/#{@site.id}"} class="text-sky-600 underline underline-offset-4">
+      <%= @site.name %>
+    </.link>
+    &gt;
+    <.link
+      patch={~p"/namespaces/#{@namespace.id}"}
+      class="text-sky-600 underline underline-offset-4"
+    >
+      <%= @namespace.name %>
+    </.link>
+    &gt; <%= @deployment.name %>
+  </:subtitle>
   <:actions>
     <.link patch={~p"/deployments/#{@deployment}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit deployment</.button>
     </.link>
+    <.link patch={~p"/deployments/#{@deployment}/registrations/new"} phx-click={JS.push_focus()} phx-window-keydown="new_registration" phx-key="+">
+      <.button>Provision database</.button>
+    </.link>
   </:actions>
 </.header>
 
-<.list>
-  <:item title="Name"><%= @deployment.name %></:item>
-</.list>
+<.table
+  id="registrations"
+  rows={@streams.registrations}
+  row_click={fn {_id, registration} -> JS.navigate(~p"/registrations/#{registration}") end}
+>
+  <:col :let={{_id, registration}} label="Name"><%= registration.name %></:col>
+  <:col :let={{_id, registration}} label="Description"><%= registration.description %></:col>
+  
+  <:action :let={{_id, registration}}>
+    <div class="sr-only">
+      <.link navigate={~p"/registrations/#{registration}"}>Show</.link>
+    </div>
+    <.link patch={~p"/deployments/#{@deployment}/registrations/#{registration}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, registration}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: registration.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
 
-<.back navigate={~p"/deployments"}>Back to deployments</.back>
+<.back navigate={~p"/namespaces/#{@namespace.id}"}>
+  Back to namespace <em><%= @namespace.name %></em> in <em><%= @site.name %></em>
+</.back>
 
-<.modal :if={@live_action == :edit} id="deployment-modal" show on_cancel={JS.patch(~p"/deployments/#{@deployment}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="deployment-modal"
+  show
+  on_cancel={JS.patch(~p"/deployments/#{@deployment}")}
+>
   <.live_component
     module={JellystoneWeb.DeploymentLive.FormComponent}
     id={@deployment.id}
     title={@page_title}
     action={@live_action}
     deployment={@deployment}
+    patch={~p"/deployments/#{@deployment}"}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action in [:new_registration, :edit_registration]}
+  id="registration-modal"
+  show
+  on_cancel={JS.patch(~p"/deployments/#{@deployment}")}
+>
+  <.live_component
+    module={JellystoneWeb.RegistrationLive.FormComponent}
+    id={:new}
+    title={@page_title}
+    action={@live_action}
+    registration={@registration}
     patch={~p"/deployments/#{@deployment}"}
   />
 </.modal>

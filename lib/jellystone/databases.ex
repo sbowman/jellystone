@@ -9,6 +9,7 @@ defmodule Jellystone.Databases do
   alias Jellystone.Databases.Site
   alias Jellystone.Databases.Namespace
   alias Jellystone.Databases.Deployment
+  alias Jellystone.Databases.Registration
 
   @doc """
   Returns the list of sites.
@@ -21,19 +22,21 @@ defmodule Jellystone.Databases do
   """
   def list_sites do
     total_namespaces_by_site =
-      from n in Namespace,
+      from(n in Namespace,
         group_by: n.site_id,
         select: %{
           site_id: n.site_id,
           total_namespaces: count(n.id)
         }
+      )
 
     Repo.all(
-      from s in Site,
+      from(s in Site,
         left_join: total in subquery(total_namespaces_by_site),
         on: total.site_id == s.id,
         order_by: :name,
         select: %Site{s | total_namespaces: total.total_namespaces}
+      )
     )
 
     # Repo.all(
@@ -68,6 +71,11 @@ defmodule Jellystone.Databases do
     # |> Repo.preload(namespaces: namespaces)
 
     # |> Repo.preload(:namespaces)
+  end
+
+  def site_by_name!(site_name) do
+    Site
+    |> Repo.get_by!(name: site_name)
   end
 
   @doc """
@@ -151,11 +159,30 @@ defmodule Jellystone.Databases do
   end
 
   def list_namespaces(%Site{id: site_id}) do
+    total_deployments_by_site =
+      from(d in Deployment,
+        group_by: d.namespace_id,
+        select: %{
+          namespace_id: d.namespace_id,
+          total_deployments: count(d.id)
+        }
+      )
+
     Repo.all(
-      from n in Namespace,
+      from(n in Namespace,
+        left_join: total in subquery(total_deployments_by_site),
+        on: total.namespace_id == n.id,
         where: n.site_id == ^site_id,
-        select: n
+        order_by: :name,
+        select: %Namespace{n | total_deployments: total.total_deployments}
+      )
     )
+
+    # Repo.all(
+    #   from n in Namespace,
+    #     where: n.site_id == ^site_id,
+    #     select: n
+    # )
   end
 
   @doc """
@@ -173,6 +200,16 @@ defmodule Jellystone.Databases do
 
   """
   def get_namespace!(id), do: Repo.get!(Namespace, id)
+
+  def ns_by_name!(namespace_name, %Site{} = site) do
+    Namespace
+    |> Repo.get_by!(name: namespace_name, site_id: site.id)
+  end
+
+  # Repo.all(
+  #   from n in Namespace,
+  #     where: n.site_id == ^site_id,
+  #     select: n
 
   @doc """
   Creates a namespace.
@@ -250,16 +287,35 @@ defmodule Jellystone.Databases do
       [%Deployment{}, ...]
 
   """
-  def list_deployments do
-    Repo.all(Deployment)
+  def list_deployments(%Namespace{id: namespace_id}) do
+    total_databases_by_site =
+      from(r in Registration,
+        group_by: r.deployment_id,
+        select: %{
+          deployment_id: r.deployment_id,
+          total_databases: count(r.id)
+        }
+      )
+
+    Repo.all(
+      from(d in Deployment,
+        left_join: total in subquery(total_databases_by_site),
+        on: total.deployment_id == d.id,
+        where: d.namespace_id == ^namespace_id,
+        order_by: :name,
+        select: %Deployment{d | total_databases: total.total_databases}
+      )
+    )
+
+    # Repo.all(
+    #   from d in Deployment,
+    #     where: d.namespace_id == ^namespace_id,
+    #     select: d
+    # )
   end
 
-  def list_deployments(%Namespace{id: namespace_id}) do
-    Repo.all(
-      from d in Deployment,
-        where: d.namespace_id == ^namespace_id,
-        select: d
-    )
+  def list_deployments do
+    Repo.all(Deployment)
   end
 
   @doc """
@@ -277,6 +333,11 @@ defmodule Jellystone.Databases do
 
   """
   def get_deployment!(id), do: Repo.get!(Deployment, id)
+
+  def deployment_by_name!(deployment_name, %Namespace{} = namespace) do
+    Deployment
+    |> Repo.get_by(name: deployment_name, namespace_id: namespace.id)
+  end
 
   @doc """
   Creates a deployment.
@@ -354,6 +415,15 @@ defmodule Jellystone.Databases do
       [%Registration{}, ...]
 
   """
+  def list_registrations(%Deployment{id: deployment_id}) do
+    Repo.all(
+      from(r in Registration,
+        where: r.deployment_id == ^deployment_id,
+        order_by: :name
+      )
+    )
+  end
+
   def list_registrations do
     Repo.all(Registration)
   end

@@ -1,7 +1,7 @@
 <.header>
   RDEI Sites
   <:actions>
-    <.link patch={~p"/sites/new"}>
+    <.link patch={~p"/sites/new"} phx-window-keydown="new_site" phx-key="+">
       <.button>New Site</.button>
     </.link>
   </:actions>

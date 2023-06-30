@@ -5,13 +5,13 @@ defmodule Jellystone.Accounts.User do
   alias Jellystone.Accounts
 
   schema "users" do
-    field :email, :string
-    field :password, :string, virtual: true, redact: true
-    field :hashed_password, :string, redact: true
-    field :confirmed_at, :naive_datetime
+    field(:email, :string)
+    field(:password, :string, virtual: true, redact: true)
+    field(:hashed_password, :string, redact: true)
+    field(:confirmed_at, :naive_datetime)
 
-    has_many :team_members, Accounts.TeamMember
-    many_to_many :teams, Accounts.Team, join_through: Accounts.TeamMember
+    has_many(:team_members, Accounts.TeamMember)
+    many_to_many(:teams, Accounts.Team, join_through: Accounts.TeamMember)
 
     timestamps()
   end

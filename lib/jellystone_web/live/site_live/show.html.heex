@@ -10,7 +10,11 @@
     <.link patch={~p"/sites/#{@site}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit site</.button>
     </.link>
-    <.link patch={~p"/sites/#{@site}/namespace/new"}>
+    <.link
+      patch={~p"/sites/#{@site}/namespace/new"}
+      phx-window-keydown="new_namespace"
+      phx-key="+"
+    >
       <.button>Add Namespace</.button>
     </.link>
   </:actions>
@@ -22,6 +26,8 @@
   row_click={fn {_id, namespace} -> JS.navigate(~p"/namespaces/#{namespace}") end}
 >
   <:col :let={{_id, namespace}} label="Name"><%= namespace.name %></:col>
+  <:col :let={{_id, namespace}} label="Deployments"><%= namespace.total_deployments %></:col>
+
   <:action :let={{_id, namespace}}>
     <div class="sr-only">
       <.link navigate={~p"/namespaces/#{namespace}"}>Show</.link>

@@ -11,11 +11,12 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
   def render(assigns) do
     namespaces =
       Jellystone.Repo.all(
-        from n in Namespace,
+        from(n in Namespace,
           join: s in Site,
           on: n.site_id == s.id,
           order_by: [s.name, n.name],
           select: %Namespace{n | site: s}
+        )
       )
 
     groups = Map.from_keys(Enum.map(namespaces, fn n -> n.site.name end), [])
@@ -116,8 +117,6 @@ defmodule JellystoneWeb.DeploymentLive.FormComponent do
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
-    IO.inspect(changeset)
-
     assign(socket, :form, to_form(changeset))
   end
 

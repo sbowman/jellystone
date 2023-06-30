@@ -3,8 +3,8 @@
   <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
     <div class="flex items-center gap-4">
       <%= if @current_user do %>
-        <.link patch={~p"/sites"} class="hover:text-zinc-700">Sites</.link>
-        <.link patch={~p"/databases"} class="hover:text-zinc-700">Databases</.link>
+        <.link navigate={~p"/sites"} class="hover:text-zinc-700">Sites</.link>
+        <.link navigate={~p"/databases"} class="hover:text-zinc-700">Databases</.link>
       <% end %>
     </div>
   </div>
